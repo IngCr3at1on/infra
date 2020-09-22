@@ -1,0 +1,9 @@
+.terraform
+*.tfstate*
+pw.tf
+*id_rsa*
+shrc-priv.*
+auth/*
+crash.log
+
+!*.gitkeep

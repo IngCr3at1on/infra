@@ -1,0 +1,21 @@
+lsb_release_name: buster
+go_version: 1.15
+
+compute_users:
+- ing
+
+packages:
+- acl
+- apt-transport-https
+- ca-certificates
+- curl
+- git
+- software-properties-common
+- zsh
+
+terraform_libvirt_version: 0.6.2
+
+nfs_shares:
+- /depths/go
+- /depths/nfs-share
+- /pond/eddy

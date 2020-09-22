@@ -1,0 +1,35 @@
+---
+- hosts: homelab
+  become: yes
+  vars_files:
+  - env_variables
+  tasks:
+  - name: add docker apt-key
+    apt_key:
+      url: https://download.docker.com/linux/debian/gpg
+      state: present
+  - name: add docker apt repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ lsb_release_name }} stable
+      state: present
+      update_cache: yes
+  - name: installing docker
+    apt:
+      pkg:
+      - docker-ce
+      state: present
+  - name: creating docker group
+    group:
+      name: docker
+      state: present
+  - name: setting compute users
+    shell: |
+      usermod -aG docker "{{ item }}"
+      touch ~/.ansible_checks/docker_groups
+    with_items: "{{ compute_users }}"
+    args:
+      creates: ~/.ansible_checks/docker_groups
+  - name: fix iptables for libvirt
+    copy:
+      src: ./docker_override.conf
+      dest: /etc/systemd/system/docker.service.d/override.conf

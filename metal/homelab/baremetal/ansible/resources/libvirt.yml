@@ -1,0 +1,42 @@
+---
+- hosts: homelab
+  vars_files:
+  - env_variables
+  tasks:
+  - name: install libvirt and dependencies
+    become: yes
+    apt:
+      pkg:
+      - qemu-kvm
+      - libvirt-daemon-system
+      - libvirt-clients
+      - bridge-utils
+      - virtinst
+      - virt-manager
+      state: present
+  - name: setting groups
+    become: yes
+    shell: |
+      usermod -aG libvirt "{{ item }}"
+      usermod -aG kvm "{{ item }}"
+      touch ~/.ansible_checks/kvm_groups
+    with_items: "{{ compute_users }}"
+    args:
+      creates: ~/.ansible_checks/kvm_groups
+  - name: replacing default storage pool
+    shell: |
+      virsh pool-destroy default
+      virsh pool-undefine default
+      virsh pool-define-as --name default --type dir --target /depths/libvirt
+      virsh pool-autostart default
+      virsh pool-start default
+      touch ~/.ansible_checks/libvirt_storage
+    args:
+      creates: ~/.ansible_checks/libvirt_storage
+  - name: enable default network
+    shell: |
+      virsh net-autostart default
+      virsh net-start default
+      touch ~/.ansible_checks/libvirt_net
+    args:
+      creates: ~/.ansible_checks/libvirt_net

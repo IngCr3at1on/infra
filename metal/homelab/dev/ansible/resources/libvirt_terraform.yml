@@ -1,0 +1,15 @@
+---
+- hosts: dev
+  vars_files:
+  - env_variables
+  tasks:
+  - name: create libvirt provider dir
+    file:
+      path: ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_libvirt_version }}/linux_amd64
+      state: directory
+  # Moved a copy of this back to the build location.
+  - name: copy libvirt provider
+    copy:
+      src: ~/go/src/github.com/dmacvicar/terraform-provider-libvirt/terraform-provider-libvirt
+      dest: ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_libvirt_version }}/linux_amd64/terraform-provider-libvirt
+      mode: 777

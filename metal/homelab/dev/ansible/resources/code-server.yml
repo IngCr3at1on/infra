@@ -1,0 +1,20 @@
+---
+- hosts: dev
+  tasks:
+#   - name: install code server
+#     shell: |
+#       curl -fsSL https://code-server.dev/install.sh | sh
+#     args:
+#       creates: ~/.cache/code-server/code-server_3.4.1_amd64.deb
+  - name: downloading service file
+    shell: |
+      curl -L https://raw.githubusercontent.com/cdr/code-server/master/ci/build/code-server.service >  /lib/systemd/system/code-server.service
+    args:
+      creates:  /lib/systemd/system/code-server.service
+  - name: starting code-server
+    shell: |
+      systemctl --user start code-server
+      systemctl --user enable code-server
+      touch ~/.ansible_checks/code_server
+    args:
+      creates: ~/.ansible_checks/code_server

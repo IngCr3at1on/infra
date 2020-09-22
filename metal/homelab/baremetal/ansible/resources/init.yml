@@ -1,0 +1,32 @@
+---
+- hosts: homelab
+  vars_files:
+  - env_variables
+  tasks:
+  - name: creating ansible_checks
+    file:
+      path: ~/.ansible_checks
+      state: directory
+  - name: creating root/ansible_checks
+    become: yes
+    file:
+      path: ~/.ansible_checks
+      state: directory
+  - name: install dependencies
+    become: yes
+    apt:
+      pkg: "{{ packages }}"
+      state: present
+  - name: ensure wheel group exists
+    become: yes
+    group:
+      name: wheel
+      state: present
+  - name: allow wheel group passwordless sudo
+    become: yes
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%wheel'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'

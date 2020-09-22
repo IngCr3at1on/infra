@@ -1,0 +1,39 @@
+---
+- hosts: dev
+  tasks:
+  - name: download shrc repo
+    become: yes
+    shell: |
+      cd /usr/local/share && \
+      git clone https://github.com/ingcr3at1on/shrc.git
+      chmod -R 0777 /usr/local/share/shrc
+    args:
+      creates: /usr/local/share/shrc
+  - name: link shrc repo
+    file:
+      dest: ~/.shrc
+      src: /usr/local/share/shrc
+      state: link
+  - name: create ~/.shrc-priv
+    file:
+      path: ~/.shrc-priv
+      state: directory
+  # NOTE this is gitignored.
+  - name: copy shrc-priv/redeam
+    copy:
+      dest: ~/.shrc-priv/redeam.sh
+      src: ./shrc-priv.redeam.sh
+  - name: update .zshrc
+    shell: |
+      echo "source \"$HOME/.shrc/zshrc\"" > "$HOME/.zshrc"
+    args:
+      creates: ~/.zshrc
+  - name: create ~/.shrc-local
+    file:
+      path: ~/.shrc-local
+      state: directory
+  - name: ssl patch
+    shell: |
+      echo 'export LD_LIBRARY_PATH=/usr/local/lib' > ~/.shrc-local/ssl-patch.sh
+    args:
+      creates: ~/.shrc-local/ssl-patch.sh

@@ -1,0 +1,17 @@
+lsb_release_name: focal
+
+node1: 192.168.42.210
+node2: 192.168.42.211
+node3: 192.168.42.212
+fqdn: lab.ingcr3at1on.com
+
+admin: ing
+
+k8s_version: 1.19.0-00
+
+packages:
+- apt-transport-https
+- ca-certificates
+- curl
+- git
+- software-properties-common

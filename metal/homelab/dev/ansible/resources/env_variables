@@ -1,0 +1,18 @@
+lsb_release_name: focal
+go_version: 1.15
+compose_version: 1.26.2
+terraform_libvirt_version: 0.6.2
+user: ing
+gopath: 192.168.42.10:/depths/go
+eddy: 192.168.42.10:/pond/eddy
+
+packages:
+- apt-transport-https
+- build-essential
+- ca-certificates
+- curl
+- git
+- jq
+- nfs-common
+- software-properties-common
+- zsh

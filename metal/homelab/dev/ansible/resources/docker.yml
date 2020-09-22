@@ -1,0 +1,31 @@
+---
+- hosts: dev
+  become: yes
+  vars_files:
+  - env_variables
+  tasks:
+  - name: add docker apt-key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+  - name: add docker apt repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ lsb_release_name }} stable
+      state: present
+      update_cache: yes
+  - name: installing docker
+    apt:
+      pkg:
+      - docker-ce
+      - docker-compose
+      state: present
+  - name: creating docker group
+    group:
+      name: docker
+      state: present
+  - name: setting compute users
+    shell: |
+      usermod -aG docker "{{ user }}"
+      touch ~/.ansible_checks/docker_groups
+    args:
+      creates: ~/.ansible_checks/docker_groups

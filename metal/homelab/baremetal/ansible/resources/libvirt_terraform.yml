@@ -1,0 +1,51 @@
+---
+- hosts: homelab
+  vars_files:
+  - env_variables
+  tasks:
+  - name: install libvirt provider dependencies
+    become: yes
+    apt:
+      pkg:
+      - libvirt-dev
+      - pkg-config
+      state: present
+  - name: create libvirt provider source dir
+    file:
+      path: ~/go/src/github.com/dmacvicar
+      state: directory
+  - name: create libvirt provider dir
+    file:
+      path: ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_libvirt_version }}/linux_amd64
+      state: directory
+  - name: clone libvirt provider source
+    shell: |
+      cd ~/go/src/github.com/dmacvicar && git clone git@github.com:dmacvicar/terraform-provider-libvirt.git
+    args:
+      creates: ~/go/src/github.com/dmacvicar/terraform-provider-libvirt
+  - name: build libvirt provider
+    shell: |
+      cd ~/go/src/github.com/dmacvicar/terraform-provider-libvirt && \
+      git checkout v{{ terraform_libvirt_version }}
+      /usr/local/go/bin/go build \
+      -mod=mod \
+      -ldflags '-X main.version={{ terraform_libvirt_version }}' \
+      -o \
+      ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_libvirt_version }}/linux_amd64/terraform-provider-libvirt \
+      github.com/dmacvicar/terraform-provider-libvirt
+    args:
+      creates: ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_libvirt_version }}/linux_amd64/terraform-provider-libvirt
+  - name: modify libvirt driver permissions
+    become: yes
+    lineinfile:
+      dest: /etc/libvirt/qemu.conf
+      state: present
+      regexp: '^#security_driver'
+      line: 'security_driver = "none"'
+  - name: restart libvirtd.service
+    become: yes
+    shell: |
+      systemctl restart libvirtd.service
+      touch ~/.ansible_checks/restart_libvirt
+    args:
+      creates: ~/.ansible_checks/restart_libvirt

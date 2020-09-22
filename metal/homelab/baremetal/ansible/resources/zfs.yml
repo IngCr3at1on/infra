@@ -1,0 +1,24 @@
+---
+- hosts: helcar
+  tasks:
+  # NOTE: this had to be done manually because of the DKMS license.
+  # TODO: figure out how to automate this step.
+  - name: install zfs
+    become: yes
+    apt:
+      pkg:
+      - zfs-dkms
+      - zfsutils-linux
+  - name: import pools
+    become: yes
+    shell: |
+      zpool import depths
+      zpool import pond
+      touch ~/.ansible_checks/zpool_import
+    args:
+      creates: ~/.ansible_checks/zpool_import
+  - name: linking eddy
+    file:
+      path: ~/eddy
+      src: /pond/eddy
+      state: link

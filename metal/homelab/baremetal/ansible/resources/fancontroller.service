@@ -1,0 +1,14 @@
+[Unit]
+Description=IPMI Fancontroller
+Before=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/usr/local/bin/fancontroller --watch
+
+[Install]
+WantedBy=multi-user.target
+Alias=fancontroller.service

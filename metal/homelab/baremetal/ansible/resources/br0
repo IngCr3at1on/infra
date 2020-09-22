@@ -1,0 +1,6 @@
+## DHCP ip config file for br0 ##
+auto br0
+ 
+# Bridge setup
+iface br0 inet dhcp
+    bridge_ports eno1

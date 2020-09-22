@@ -1,0 +1,33 @@
+---
+- hosts: helcar
+  become: yes
+  tasks:
+  - name: install ipmitool
+    apt:
+      pkg:
+      - ipmitool
+  - name: create build directory
+    file:
+      path: /opt/fancontrol
+      state: directory
+  - name: copy fan controller source
+    copy:
+      src: ./fancontrol.go
+      dest: /opt/fancontrol/fancontrol.go
+  - name: build fan controller
+    shell: |
+      cd /opt/fancontrol && /usr/local/go/bin/go mod init fancontroller
+      /usr/local/go/bin/go build -o /usr/local/bin/fancontroller /opt/fancontrol/fancontrol.go
+    args:
+      creates: /usr/local/bin/fancontroller
+  - name: copy service file
+    copy:
+      src: ./fancontroller.service
+      dest: /etc/systemd/system/fancontroller.service
+  - name: enable fancontroller
+    shell: |
+      systemctl start fancontroller.service
+      systemctl enable fancontroller.service
+      touch ~/.ansible_checks/fancontroller
+    args:
+      creates: ~/.ansible_checks/fancontroller
