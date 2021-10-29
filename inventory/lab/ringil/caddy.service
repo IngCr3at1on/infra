@@ -1,0 +1,14 @@
+[Unit]
+Description=Caddy
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=caddy start -config /etc/Caddyfile -watch
+
+[Install]
+WantedBy=multi-user.target
+Alias=caddy.service

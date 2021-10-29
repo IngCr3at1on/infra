@@ -1,0 +1,42 @@
+---
+- name: run ubuntu tasks
+  become: yes
+  import_tasks: debian.yml
+  when: (supported_os == "ubuntu") or (supported_os == "debian")
+- name: fail for unsupported OS
+  ansible.builtin.fail:
+    msg: Unsupported distribution {{ ansible_facts['distribution'] }}
+  when: supported_os is undefined
+
+- name: add user to libvirt groups
+  become: yes
+  ansible.builtin.user:
+    name: "{{ user }}"
+    append: yes
+    groups:
+    - libvirt
+    - kvm
+
+- name: configure terraform requirements
+  import_tasks: terraform.yml
+  vars:
+    # This must match what's expected in our terraform files.
+    terraform_provider_version: 0.6.11
+    pool: "{{ libvirt.pool }}"
+    uri: "{{ libvirt.uri }}"
+
+- name: download qemu hook base file
+  become: yes
+  ansible.builtin.get_url:
+    # This should _always_ point to a specific commit.
+    url: https://raw.githubusercontent.com/doccaz/kvm-scripts/e76331fc4ad0b2bdbe09195bc5f7ddc41977806b/qemu-hook-script
+    dest: /etc/libvirt/hooks/qemu
+    mode: '0755'
+
+- name: download kvm-network-restart
+  become: yes
+  ansible.builtin.get_url:
+    # This should _always_ point to a specific commit.
+    url: https://raw.githubusercontent.com/doccaz/kvm-scripts/e76331fc4ad0b2bdbe09195bc5f7ddc41977806b/kvm-network-restart
+    dest: /usr/sbin/kvm-network-restart
+    mode: '0755'

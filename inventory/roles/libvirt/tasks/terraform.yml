@@ -1,0 +1,22 @@
+---
+- name: install terraform provider
+  import_tasks: terraform_provider.yml
+
+- name: copy terraform project to host
+  ansible.builtin.copy:
+    dest: "{{ terraform_root }}/libvirt"
+    src: ../files/terraform/
+
+- name: create libvirt default storage pool
+  community.general.terraform:
+    project_path: "{{ terraform_root }}/libvirt"
+    state: present
+    variables:
+      uri: "{{ uri }}"
+      pool: "{{ pool }}"
+  register: libvirt_pool_state
+
+- name: start pool and set to autostart
+  become: yes
+  shell: virsh pool-autostart default
+  when: libvirt_pool_state.changed

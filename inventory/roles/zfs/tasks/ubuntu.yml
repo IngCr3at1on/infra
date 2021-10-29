@@ -1,0 +1,6 @@
+---
+- name: install zfs
+  ansible.builtin.apt: 
+    pkg:
+    - zfsutils-linux
+    update_cache: yes

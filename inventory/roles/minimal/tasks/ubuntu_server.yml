@@ -1,0 +1,40 @@
+---
+- name: add hashicorp apt-key
+  become: yes
+  ansible.builtin.apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+- name: add hashicorp apt repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://apt.releases.hashicorp.com {{ lsb_release_name }} main
+    state: present
+    update_cache: yes
+- name: add caddy apt-key
+  become: yes
+  ansible.builtin.apt_key:
+    url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+    state: present
+- name: add caddy apt repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://dl.cloudsmith.io/public/caddy/testing/deb/debian any-version main
+    state: present
+    update_cache: yes
+- name: install minimal expected apps
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+    - caddy
+    - terraform
+    - mkisofs
+    update_cache: yes
+
+- name: create terraform root if not present
+  become: yes
+  ansible.builtin.file:
+    path: "{{ terraform_root }}"
+    state: directory
+    mode: '0755'
+    group: '{{ user }}'
+    owner: '{{ user }}'

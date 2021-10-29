@@ -1,0 +1,21 @@
+---
+- name: install nfs
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+    - nfs-kernel-server
+    update_cache: yes
+
+- name: create nfs shares
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    line: '{{ item }} {{ subnet | ansible.netcommon.ipaddr }}(rw,sync,no_subtree_check)'
+    state: present
+  with_items: "{{ nfs.shares }}"
+  register: nfs_shares_state
+  when: nfs_shares is defined
+- name: update nfs exports
+  become: yes
+  shell: exportfs -r
+  when: nfs_shares_state.changed

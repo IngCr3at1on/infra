@@ -1,0 +1,21 @@
+---
+- name: run ubuntu tasks
+  become: yes
+  import_tasks: ubuntu.yml
+  when: supported_os == "ubuntu"
+- name: fail for unsupported OS
+  ansible.builtin.fail:
+    msg: Unsupported distribution {{ ansible_facts['distribution'] }}
+  when: supported_os is undefined
+
+- name: creating docker group
+  become: yes
+  ansible.builtin.group:
+    name: docker
+    state: present
+- name: add primary user to docker group
+  become: yes
+  ansible.builtin.user:
+    name: "{{ user }}"
+    append: yes
+    groups: docker

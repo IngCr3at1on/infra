@@ -1,0 +1,37 @@
+---
+# FIXME: remove previous version of go.
+# - name: check go version
+#   shell: |
+
+
+- name: install go
+  become: yes
+  shell: curl -L "https://golang.org/dl/go{{ go.version }}.linux-amd64.tar.gz" | tar -C /usr/local -xz
+  args:
+    creates: /usr/local/go
+- name: replace global path to include go for all users
+  become: yes
+  # FIXME: another bad idea...
+  ansible.builtin.copy:
+    dest: /etc/environment
+    content: PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin"
+- name: create user GOPATH dir
+  ansible.builtin.file:
+    path: ~/go
+    state: directory
+    mode: '0755'
+- name: create path dir
+  become: yes
+  ansible.builtin.file:
+    path: "{{ go.path }}"
+    state: directory
+    mode: '0755'
+    # FIXME: this is probably not a good idea...
+    group: "{{ user }}"
+    owner: "{{ user }}"
+- name: link path to user GOPATH
+  ansible.builtin.file:
+    dest: ~/go/src
+    src: "{{ go.path }}"
+    state: link
+  when: go.path is defined

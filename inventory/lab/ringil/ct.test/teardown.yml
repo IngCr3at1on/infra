@@ -1,0 +1,7 @@
+---
+- hosts: ringil
+  tasks:
+    - name: removing /opt/docker-compose/test
+      file:
+        path: /opt/docker-compose/test
+        state: absent

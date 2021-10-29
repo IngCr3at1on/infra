@@ -1,9 +1,0 @@
-version: "3.8"
-services:
-  unbound:
-    image: mvance/unbound:1.11.0
-    volumes:
-      - ./a-records.conf:/opt/unbound/etc/unbount/a-records.conf:ro
-    ports:
-      - 53
-    

@@ -1,0 +1,59 @@
+---
+- hosts: ringil
+
+  vars:
+    is_server: true
+    domain: ingcr3at1on.com
+    host: 192.168.42.12
+    # {{ myvar | ansible.netcommon.ipaddr }}
+    # {{ myvar | ansible.netcommon.ipv4 }}
+    subnet: 192.168.42.0/24
+    nfs:
+      shares:
+      - /spring/go
+      - /spring/share
+    zfs:
+      pools:
+        # FIXME: this is gross but when I pass these as separate items I have
+        # issues getting the final command as it's needed.
+        spring: /dev/sdb /dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg
+      user_dirs:
+      - /spring/share
+      - /spring/docker-compose
+      - /spring/terraform
+    go:
+      path: /spring/go
+      version: 1.17.1
+    terraform_root: /spring/terraform
+    libvirt:
+      pool: /spring/libvirt
+      uri: qemu:///system
+
+  roles:
+    - role: ../../roles/minimal
+    - role: ../../roles/zfs # FIXME: resolve import before re-provisioning...
+    - role: ../../roles/nfs
+    - role: ../../roles/go
+    - role: ../../roles/docker
+    - role: ../../roles/libvirt
+
+  tasks:
+    - name: create caddyfile
+      become: yes
+      ansible.builtin.copy:
+        src: ./Caddyfile
+        dest: /etc/Caddyfile
+        mode: '0644'
+    - name: copy caddy service file
+      become: yes
+      ansible.builtin.copy:
+        src: ./caddy.service
+        dest: /etc/systemd/system/caddy.service
+        mode: '0644'
+    - name: enable caddy
+      ansible.builtin.systemd:
+        name: caddy.service
+        state: started
+        enabled: yes
+
+- import_playbook: ./vm.dev/deploy.yml

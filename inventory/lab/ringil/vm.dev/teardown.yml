@@ -1,0 +1,14 @@
+---
+- hosts: ringil
+  vars:
+    terraform_root: /spring/terraform
+  tasks:
+    - name: deleting dev virtual machine
+      community.general.terraform:
+        project_path: "{{ terraform_root }}/dev"
+        state: absent
+        variables:
+          hostname: dev
+          address: ""
+          user: ""
+          user_password: ""

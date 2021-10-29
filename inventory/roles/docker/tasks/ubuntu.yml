@@ -1,0 +1,23 @@
+---
+- name: docker dependencies
+  ansible.builtin.apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+- name: add docker apt-key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+- name: add docker apt repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ lsb_release_name }} stable
+    state: present
+    update_cache: yes
+- name: installing docker
+  ansible.builtin.apt:
+    pkg:
+    - docker-ce
+    - docker-compose

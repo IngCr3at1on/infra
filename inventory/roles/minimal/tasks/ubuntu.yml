@@ -1,0 +1,15 @@
+---
+- name: set supported fact
+  set_fact:
+    supported_os: ubuntu
+
+- name: get lsb_release_name
+  shell: lsb_release -c | sed "s|Codename:.||g"
+  register: lsb_release_name
+- name: set lsb_release_name fact
+  set_fact:
+    lsb_release_name: "{{ lsb_release_name.stdout }}"
+
+- name: perform server tasks
+  import_tasks: ubuntu_server.yml
+  when: is_server == true

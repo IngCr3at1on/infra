@@ -1,4 +1,0 @@
----
-- import_playbook: resources/init.yml
-- import_playbook: resources/docker.yml
-- import_playbook: resources/install_k8s.yml

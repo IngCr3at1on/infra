@@ -1,0 +1,38 @@
+---
+- name: create libvirt provider source dir
+  file:
+    path: ~/go/src/github.com/dmacvicar
+    state: directory
+- name: create libvirt provider dir
+  file:
+    path: ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_provider_version }}/linux_amd64
+    state: directory
+- name: clone libvirt provider source
+  ansible.builtin.git:
+    repo: https://github.com/dmacvicar/terraform-provider-libvirt.git
+    dest: ~/go/src/github.com/dmacvicar/terraform-provider-libvirt
+    version: v{{ terraform_provider_version }}
+- name: build libvirt provider
+  shell: |
+    /usr/local/go/bin/go build \
+    -mod=mod \
+    -ldflags '-X main.version={{ terraform_provider_version }}' \
+    -o \
+    ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_provider_version }}/linux_amd64/terraform-provider-libvirt \
+    github.com/dmacvicar/terraform-provider-libvirt
+  args:
+    creates: ~/.local/share/terraform/plugins/registry.terraform.io/dmacvicar/libvirt/{{ terraform_provider_version }}/linux_amd64/terraform-provider-libvirt
+- name: modify libvirt driver permissions
+  become: yes
+  lineinfile:
+    dest: /etc/libvirt/qemu.conf
+    state: present
+    regexp: '^#security_driver'
+    line: 'security_driver = "none"'
+  register: qemu_conf_state
+- name: restart libvirtd
+  become: yes
+  ansible.builtin.service:
+    name: libvirtd
+    state: restarted
+  when: qemu_conf_state.changed

@@ -1,0 +1,7 @@
+---
+- name: install nfs common
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+    - nfs-common
+    update_cache: yes

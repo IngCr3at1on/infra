@@ -5,5 +5,6 @@ pw.tf
 shrc-priv.*
 auth/*
 crash.log
-
+.password
 !*.gitkeep
+*old

@@ -1,0 +1,36 @@
+---
+- name: run ubuntu tasks
+  become: yes
+  import_tasks: ubuntu.yml
+  when: supported_os == "ubuntu"
+- name: fail for unsupported OS
+  ansible.builtin.fail:
+    msg: Unsupported distribution {{ ansible_facts['distribution'] }}
+  when: supported_os is undefined
+
+# FIXME: This is bad, if zpool fails for some other reason, ansible won't alert...
+- name: check pool status
+  become: yes
+  shell: zpool status {{ item }}
+  register: zpool_status
+  with_items: "{{ zfs.pools }}"
+  failed_when: "zpool_status.rc not in [ 0, 1 ]"
+
+# FIXME: should attempt import rather than creation...
+
+- name: create zpool
+  become: yes
+  shell: zpool create -m /{{ item.item }} {{ item.item }} raidz3 {{ zfs.pools[ item.item ] }}
+  with_items: "{{ zpool_status.results }}"
+  when: item.rc != 0
+
+- name: create user dirs
+  become: yes
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    group: "{{ user }}"
+    owner: "{{ user }}"
+  with_items: "{{ zfs.user_dirs }}"
+  when: zfs.user_dirs is defined

@@ -1,0 +1,12 @@
+---
+- name: install libvirt and dependencies
+  ansible.builtin.apt:
+    pkg:
+    - bridge-utils
+    - qemu-kvm
+    - libvirt-daemon-system
+    - libvirt-clients
+    - libvirt-dev
+    - pkg-config
+    - libxml-xpath-perl
+    update_cache: yes

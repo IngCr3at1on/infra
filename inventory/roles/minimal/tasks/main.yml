@@ -1,0 +1,19 @@
+---
+- name: get current user
+  shell: echo $USER
+  register: user
+- name: set user fact
+  set_fact:
+    user: "{{ user.stdout }}"
+
+- name: run ubuntu tasks
+  import_tasks: ubuntu.yml
+  when: ansible_facts['distribution'] == "Ubuntu"
+- name: fail for unsupported OS
+  ansible.builtin.fail: msg="Unsupported distribution {{ ansible_facts['distribution'] }}"
+  when: ansible_facts['distribution'] != "Ubuntu"
+
+- name: generate ssh key
+  community.crypto.openssh_keypair:
+    path: ~/.ssh/id_ed25519
+    type: ed25519

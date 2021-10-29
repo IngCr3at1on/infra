@@ -1,0 +1,9 @@
+---
+- name: run ubuntu tasks
+  become: yes
+  import_tasks: ubuntu.yml
+  when: supported_os == "ubuntu"
+- name: fail for unsupported OS
+  ansible.builtin.fail:
+    msg: Unsupported distribution {{ ansible_facts['distribution'] }}
+  when: supported_os is undefined

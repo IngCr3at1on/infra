@@ -1,0 +1,23 @@
+---
+- hosts: ringil
+  tasks:
+    - name: creating /opt/docker-compose/test
+      ansible.builtin.file:
+        path: /opt/docker-compose/test
+        state: directory
+        mode: '0755'
+        group: docker
+        owner: "{{ user }}"
+    - name: copy docker-compose.yml to host
+      ansible.builtin.copy:
+        src: ./docker-compose.yml
+        dest: /opt/docker-compose/test/docker-compose.yml
+        mode: '0655'
+    - name: start test container
+      community.docker.docker_compose:
+        project_src: /opt/docker-compose/test
+        state: present
+      register: output
+    - name: display output
+      ansible.builtin.debug:
+        msg: "{{ output }}"

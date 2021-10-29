@@ -1,8 +1,0 @@
-[nodes]
-node1 ansible_host=192.168.42.210
-node2 ansible_host=192.168.42.211
-node3 ansible_host=192.168.42.212
-
-[workers]
-node2
-node3

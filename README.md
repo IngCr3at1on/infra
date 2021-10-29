@@ -4,6 +4,6 @@ These are for my personal infrastructure and are likely not appropriate for your
 
 ## Notes
 
-* clusters dir is a WIP and should be mostly ignored for the time being
-* metal/homelab/k8s is in a similar state
-
+* ansible community.general is used, it can be installed with `ansible-galaxy collection install community.general`
+* ansible community.docker is used, it can be installed with `ansible-galaxy collection install community.docker`
+* ansible community.crypto is used, it can be installed with `ansible-galaxy collection install community.crypto`

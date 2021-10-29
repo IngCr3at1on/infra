@@ -1,0 +1,34 @@
+---
+- hosts: ringil
+  vars:
+    terraform_root: /spring/terraform
+  vars_files:
+  # mkpasswd --method=SHA-512 --rounds=4096
+  - .password
+  tasks:
+    - name: copy terraform project to host
+      ansible.builtin.copy:
+        dest: "{{ terraform_root }}/dev"
+        src: ../../../resources/terraform/vm_base/
+    - name: create virtual machine
+      community.general.terraform:
+        project_path: "{{ terraform_root }}/dev"
+        state: present
+        force_init: yes
+        variables:
+          user: "{{ user }}"
+          hostname: dev
+          cpus: 4
+          memory: "{{ 1024 * 6 }}"
+          disk_size: "{{ 1024 * 1024 * 1024 * 30 }}"
+          user_password: "{{ password }}"
+          address: "192.168.122.100/24"
+    - name: create ssh forward
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/libvirt/hooks/qemu
+        line: addForward dev eno1 192.168.42.12 22100 virbr0 192.168.122.100 22 tcp
+        state: present
+    - name: restart kvm network
+      become: yes
+      shell: /usr/sbin/kvm-network-restart default
